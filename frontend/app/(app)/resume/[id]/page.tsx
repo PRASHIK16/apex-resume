@@ -10,11 +10,11 @@ export default async function ResumeDetailPage({ params }: { params: Promise<{ i
           <ArrowLeft className="w-4 h-4" /> Back to Resumes
         </Link>
         <h1 className="text-2xl font-semibold text-white mb-2">Resume Detail</h1>
-        <p className="text-white/40 text-sm">Resume ID: {params.id}</p>
+        <p className="text-white/40 text-sm">Resume ID: {id}</p>
       </div>
 
       <div className="flex gap-3 mb-8">
-        <Link href={`/resume/${params.id}/analyze`}
+        <Link href={`/resume/${id}/analyze`}
           className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2.5 rounded-lg font-medium text-sm transition-colors">
           <Zap className="w-4 h-4" /> Run AI Analysis
         </Link>
