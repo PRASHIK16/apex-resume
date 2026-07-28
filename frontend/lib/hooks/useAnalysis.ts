@@ -23,7 +23,9 @@ export function useAnalysisPolling(id: string, enabled: boolean) {
       return getAnalysisStatus(id, token!);
     },
     enabled,
-    refetchInterval: (data) =>
-      data?.status === "complete" || data?.status === "failed" ? false : 3000,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      return data?.status === "complete" || data?.status === "failed" ? false : 3000;
+    },
   });
 }
