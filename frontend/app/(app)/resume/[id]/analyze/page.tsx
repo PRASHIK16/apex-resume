@@ -60,7 +60,8 @@ const MOCK_ANALYSIS = {
   ],
 };
 
-export default function AnalyzePage({ params }: { params: { id: string } }) {
+export default async function AnalyzePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const [loading, setLoading] = useState(false);
   const analysis = MOCK_ANALYSIS;
 

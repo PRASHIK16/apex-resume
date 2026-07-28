@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft, Zap } from "lucide-react";
 
-export default function ResumeDetailPage({ params }: { params: { id: string } }) {
+export default async function ResumeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
