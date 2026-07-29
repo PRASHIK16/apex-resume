@@ -37,11 +37,11 @@ async def upload_resume(
     result = await db.execute(select(User).where(User.clerk_id == current_user["clerk_id"]))
     user = result.scalar_one_or_none()
     if not user:
-    clerk_id = current_user["clerk_id"]
-    email = current_user.get("email") or f"{clerk_id}@clerk.local"
-    user = User(clerk_id=clerk_id, email=email)
-    db.add(user)
-    await db.flush()
+        clerk_id = current_user["clerk_id"]
+        email = current_user.get("email") or f"{clerk_id}@clerk.local"
+        user = User(clerk_id=clerk_id, email=email)
+        db.add(user)
+        await db.flush()
 
     resume = Resume(
         id=file_id, user_id=user.id, file_url=file_url,
