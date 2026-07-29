@@ -6,7 +6,6 @@ import uuid
 from app.core.dependencies import get_db, get_current_user
 from app.models.db_models import Analysis, Resume, User
 from app.schemas.analysis import CreateAnalysisRequest, AnalysisResponse, AnalysisStatusResponse
-from app.services.ai_orchestrator import run_analysis
 
 router = APIRouter()
 
@@ -18,6 +17,7 @@ async def create_analysis(
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    from app.services.ai_orchestrator import run_analysis
     result = await db.execute(select(Resume).where(Resume.id == request.resume_id))
     resume = result.scalar_one_or_none()
     if not resume:
