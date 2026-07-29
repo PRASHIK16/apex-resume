@@ -7,11 +7,11 @@ import { UserButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { href: "/dashboard",       icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/resume",          icon: FileText,         label: "My Resumes" },
-  { href: "/interview-prep",  icon: Mic2,             label: "Interview Prep" },
-  { href: "/cover-letter",    icon: PenTool,          label: "Cover Letter" },
-  { href: "/settings",        icon: Settings,         label: "Settings" },
+  { href: "/dashboard",      icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/resume",         icon: FileText,         label: "My Resumes" },
+  { href: "/interview-prep", icon: Mic2,             label: "Interview Prep" },
+  { href: "/cover-letter",   icon: PenTool,          label: "Cover Letter" },
+  { href: "/settings",       icon: Settings,         label: "Settings" },
 ];
 
 export default function Sidebar() {
@@ -38,9 +38,7 @@ export default function Sidebar() {
             <Link key={href} href={href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                active
-                  ? "bg-white/8 text-white font-medium"
-                  : "text-white/50 hover:text-white hover:bg-white/5"
+                active ? "bg-white/8 text-white font-medium" : "text-white/50 hover:text-white hover:bg-white/5"
               )}>
               <Icon className="w-4 h-4 flex-shrink-0" />
               {label}
@@ -49,13 +47,11 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Free tier banner */}
+      {/* Free tier */}
       <div className="mx-3 mb-3 p-3 rounded-lg bg-indigo-500/8 border border-indigo-500/20">
         <p className="text-xs font-medium text-indigo-300 mb-1">Free Plan</p>
-        <p className="text-xs text-white/40 mb-2">3 analyses remaining</p>
-        <Link href="/settings/billing" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
-          Upgrade to Pro →
-        </Link>
+        <p className="text-xs text-white/40 mb-2">Unlimited analyses</p>
+        <span className="text-xs text-indigo-400 font-medium">Pro coming soon</span>
       </div>
 
       {/* User */}
