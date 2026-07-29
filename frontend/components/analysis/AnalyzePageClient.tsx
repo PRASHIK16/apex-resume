@@ -78,10 +78,10 @@ export default function AnalyzePageClient({ id }: { id: string }) {
       // Step 2: Poll for completion
       setStatusMessage("Analyzing your resume...");
       let attempts = 0;
-      const maxAttempts = 30;
+      const maxAttempts = 60;
 
       while (attempts < maxAttempts) {
-        await new Promise((r) => setTimeout(r, 2000));
+        await new Promise((r) => setTimeout(r, 3000));
         attempts++;
 
         const statusRes = await fetch(
