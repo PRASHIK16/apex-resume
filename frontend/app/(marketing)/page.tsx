@@ -240,21 +240,24 @@ export default function LandingPage() {
       </section>
 
       {/* FOOTER */}
+      {/* FOOTER */}
       <footer className="py-12 px-6 border-t border-white/5">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-indigo-500 rounded-md flex items-center justify-center">
-              <Zap className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="text-sm font-semibold">apex</span>
-          </div>
-          <p className="text-sm text-white/30">Built for job seekers everywhere</p>
-          <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-sm text-white/40 hover:text-white/60 transition-colors">Privacy</Link>
-            <Link href="/terms" className="text-sm text-white/40 hover:text-white/60 transition-colors">Terms</Link>
-          </div>
-        </div>
-      </footer>
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="flex items-center gap-2">
+      <div className="w-6 h-6 bg-indigo-500 rounded-md flex items-center justify-center">
+        <Zap className="w-3.5 h-3.5 text-white" />
+      </div>
+      <span className="text-sm font-semibold">apex</span>
+    </div>
+    <p className="text-xs text-white/25">
+      © 2026 Prashik Dongre. All rights reserved.
+    </p>
+    <div className="flex items-center gap-6">
+      <Link href="/privacy" className="text-sm text-white/40 hover:text-white/60 transition-colors">Privacy</Link>
+      <Link href="/terms" className="text-sm text-white/40 hover:text-white/60 transition-colors">Terms</Link>
+    </div>
+  </div>
+</footer>
     </div>
   );
 }
