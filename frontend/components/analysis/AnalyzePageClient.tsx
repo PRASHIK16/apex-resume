@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
@@ -21,50 +21,58 @@ interface AnalysisData {
   impact_score: number;
   readability_score: number;
   rejection_risks: Array<{
-    riskTitle: string;
-    specificText: string;
-    whyItHurts: string;
-    severity: "HIGH" | "MEDIUM" | "LOW";
-    fix: string;
+    riskTitle: string; specificText: string;
+    whyItHurts: string; severity: "HIGH" | "MEDIUM" | "LOW"; fix: string;
   }>;
   bullet_analyses: Array<{
-    bulletId: string;
-    original: string;
-    confidenceScore: number;
-    impactLevel: "HIGH" | "MEDIUM" | "LOW";
-    hasQuantification: boolean;
-    passivePhrases: string[];
+    bulletId: string; original: string; confidenceScore: number;
+    impactLevel: "HIGH" | "MEDIUM" | "LOW"; hasQuantification: boolean; passivePhrases: string[];
   }>;
 }
+
+const MESSAGES = [
+  "Reading your resume...",
+  "Extracting sections and bullets...",
+  "Running ATS compatibility checks...",
+  "Scoring language confidence...",
+  "Identifying rejection risks...",
+  "Calculating your score...",
+  "Almost done...",
+];
 
 export default function AnalyzePageClient({ id }: { id: string }) {
   const { getToken } = useAuth();
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
-  const [statusMessage, setStatusMessage] = useState("Starting analysis...");
-
+  const [error, setError] = useState("");
+  const [msgIdx, setMsgIdx] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+  useEffect(() => { startAnalysis(); }, [id]);
+
   useEffect(() => {
-    startAnalysis();
-  }, [id]);
+    if (loading) {
+      intervalRef.current = setInterval(() => {
+        setMsgIdx(i => (i + 1) % MESSAGES.length);
+      }, 2500);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [loading]);
 
   async function startAnalysis() {
+    setLoading(true);
+    setError("");
+    setMsgIdx(0);
+
     try {
-      setLoading(true);
-      setError("");
       const token = await getToken();
       if (!token) throw new Error("Not authenticated");
 
-      // Step 1: Create analysis
-      setStatusMessage("Creating analysis job...");
+      // Create analysis
       const createRes = await fetch(`${apiUrl}/api/v1/analyses`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ resume_id: id, mode: "kind" }),
       });
 
@@ -75,13 +83,10 @@ export default function AnalyzePageClient({ id }: { id: string }) {
 
       const { analysis_id } = await createRes.json();
 
-      // Step 2: Poll for completion
-      setStatusMessage("Analyzing your resume...");
+      // Poll status
       let attempts = 0;
-      const maxAttempts = 60;
-
-      while (attempts < maxAttempts) {
-        await new Promise((r) => setTimeout(r, 3000));
+      while (attempts < 60) {
+        await new Promise(r => setTimeout(r, 3000));
         attempts++;
 
         const statusRes = await fetch(
@@ -90,60 +95,59 @@ export default function AnalyzePageClient({ id }: { id: string }) {
         );
 
         if (!statusRes.ok) continue;
-        const statusData = await statusRes.json();
+        const { status } = await statusRes.json();
 
-        if (statusData.status === "complete") {
-          setStatusMessage("Fetching results...");
+        if (status === "complete") {
+          // Fetch full result
           const resultRes = await fetch(
             `${apiUrl}/api/v1/analyses/${analysis_id}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
+          if (!resultRes.ok) throw new Error("Failed to fetch results");
           const result = await resultRes.json();
           setAnalysis(result);
           setLoading(false);
           return;
         }
 
-        if (statusData.status === "failed") {
+        if (status === "failed") {
           throw new Error("Analysis failed — please try again");
         }
-
-        const messages = [
-          "Reading your resume...",
-          "Extracting sections and bullets...",
-          "Running ATS compatibility checks...",
-          "Scoring language confidence...",
-          "Identifying rejection risks...",
-          "Calculating overall score...",
-        ];
-        setStatusMessage(messages[attempts % messages.length]);
       }
 
       throw new Error("Analysis timed out — please try again");
+
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Analysis failed");
       setLoading(false);
     }
   }
 
-  if (loading) return <AnalysisLoader />;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="relative w-16 h-16 mb-6">
+          <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+          <div className="absolute inset-0 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+        </div>
+        <h3 className="text-base font-medium text-white mb-2">Analyzing your resume</h3>
+        <p className="text-sm text-white/40 transition-all">{MESSAGES[msgIdx]}</p>
+        <p className="text-xs text-white/20 mt-3">This takes 15-30 seconds</p>
+      </div>
+    );
+  }
 
   if (error) {
     return (
       <div className="max-w-5xl mx-auto">
-        <Link
-          href={`/resume/${id}`}
-          className="inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-colors mb-6"
-        >
+        <Link href={`/resume/${id}`} className="inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to Resume
         </Link>
         <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-8 text-center">
           <p className="text-red-400 font-medium mb-2">Analysis Failed</p>
           <p className="text-white/40 text-sm mb-4">{error}</p>
-          <button
-            onClick={startAnalysis}
-            className="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
+          <button onClick={startAnalysis}
+            className="inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
             <RefreshCw className="w-4 h-4" /> Try Again
           </button>
         </div>
@@ -156,25 +160,16 @@ export default function AnalyzePageClient({ id }: { id: string }) {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-        <Link
-          href={`/resume/${id}`}
-          className="inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-colors mb-6"
-        >
+        <Link href={`/resume/${id}`} className="inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to Resume
         </Link>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-white mb-1">
-              Analysis Results
-            </h1>
-            <p className="text-white/40 text-sm">
-              AI-powered resume analysis · 6 dimensions scored
-            </p>
+            <h1 className="text-2xl font-semibold text-white mb-1">Analysis Results</h1>
+            <p className="text-white/40 text-sm">ATS analysis · 6 dimensions scored</p>
           </div>
-          <button
-            onClick={startAnalysis}
-            className="flex items-center gap-2 text-white/40 hover:text-white text-xs border border-white/10 hover:border-white/20 px-3 py-1.5 rounded-lg transition-all"
-          >
+          <button onClick={startAnalysis}
+            className="flex items-center gap-2 text-white/40 hover:text-white text-xs border border-white/10 hover:border-white/20 px-3 py-1.5 rounded-lg transition-all">
             <RefreshCw className="w-3.5 h-3.5" /> Re-analyze
           </button>
         </div>
@@ -185,36 +180,29 @@ export default function AnalyzePageClient({ id }: { id: string }) {
           <ScoreReveal score={analysis.overall_score ?? 0} />
         </div>
         <div className="lg:col-span-2">
-          <ScoreBreakdown
-            scores={{
-              atsKeyword: analysis.ats_keyword_score ?? 0,
-              atsFormat: analysis.ats_format_score ?? 0,
-              contentQuality: analysis.content_quality_score ?? 0,
-              confidence: analysis.confidence_score ?? 0,
-              impact: analysis.impact_score ?? 0,
-              readability: analysis.readability_score ?? 0,
-            }}
-          />
+          <ScoreBreakdown scores={{
+            atsKeyword: analysis.ats_keyword_score ?? 0,
+            atsFormat: analysis.ats_format_score ?? 0,
+            contentQuality: analysis.content_quality_score ?? 0,
+            confidence: analysis.confidence_score ?? 0,
+            impact: analysis.impact_score ?? 0,
+            readability: analysis.readability_score ?? 0,
+          }} />
         </div>
       </div>
 
-      {analysis.rejection_risks?.length > 0 && (
+      {(analysis.rejection_risks?.length ?? 0) > 0 && (
         <div className="mb-5">
           <RejectionRadar risks={analysis.rejection_risks} />
         </div>
       )}
 
-      {analysis.bullet_analyses?.length > 0 && (
-        <BulletAnalyzer
-          bullets={analysis.bullet_analyses.map((b) => ({
-            bulletId: b.bulletId,
-            original: b.original,
-            confidenceScore: b.confidenceScore,
-            impactLevel: b.impactLevel,
-            hasQuantification: b.hasQuantification,
-            passivePhrases: b.passivePhrases,
-          }))}
-        />
+      {(analysis.bullet_analyses?.length ?? 0) > 0 && (
+        <BulletAnalyzer bullets={analysis.bullet_analyses.map(b => ({
+          bulletId: b.bulletId, original: b.original,
+          confidenceScore: b.confidenceScore, impactLevel: b.impactLevel,
+          hasQuantification: b.hasQuantification, passivePhrases: b.passivePhrases,
+        }))} />
       )}
     </div>
   );
