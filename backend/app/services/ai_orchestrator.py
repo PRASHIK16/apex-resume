@@ -77,7 +77,7 @@ async def _analyze_with_claude(resume_text: str, jd_text: str = None, api_key: s
     prompt = _build_prompt(resume_text, jd_text)
 
     message = await client.messages.create(
-        model="claude-3-5-sonnet-20241022",
+        model="claude-sonnet-4-6",
         max_tokens=2000,
         messages=[{"role": "user", "content": prompt}],
     )
