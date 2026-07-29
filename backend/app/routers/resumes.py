@@ -41,7 +41,7 @@ async def upload_resume(
         email = current_user.get("email") or f"{clerk_id}@clerk.local"
         user = User(clerk_id=clerk_id, email=email)
         db.add(user)
-        await db.flush()
+    await db.flush()
 
     resume = Resume(
         id=file_id, user_id=user.id, file_url=file_url,

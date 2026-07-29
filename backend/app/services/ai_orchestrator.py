@@ -103,6 +103,7 @@ async def _analyze_with_claude(resume_text: str, jd_text: str = None, api_key: s
 
 async def run_analysis(analysis_id: str, resume_text: str, jd_text: str = None):
     from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+    from sqlalchemy.pool import NullPool
     from sqlalchemy import select
     from app.core.config import settings
     from app.models.db_models import Analysis
@@ -110,11 +111,8 @@ async def run_analysis(analysis_id: str, resume_text: str, jd_text: str = None):
 
     engine = create_async_engine(
         settings.DATABASE_URL,
-        pool_pre_ping=True,
-        connect_args={
-            "statement_cache_size": 0,
-            "prepared_statement_cache_size": 0,
-        },
+        poolclass=NullPool,
+        connect_args={"statement_cache_size": 0},
     )
     SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
