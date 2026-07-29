@@ -73,10 +73,10 @@ async def _analyze_with_claude(resume_text: str, jd_text: str = None, api_key: s
     if not resume_text or len(resume_text.strip()) < 50:
         return {}
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.AsyncAnthropic(api_key=api_key)
     prompt = _build_prompt(resume_text, jd_text)
 
-    message = client.messages.create(
+    message = await client.messages.create(
         model="claude-3-5-sonnet-20241022",
         max_tokens=2000,
         messages=[{"role": "user", "content": prompt}],
