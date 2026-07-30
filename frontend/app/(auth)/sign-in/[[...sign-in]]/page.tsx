@@ -23,6 +23,8 @@ export default function SignInPage() {
             footerActionLink: "text-indigo-400 hover:text-indigo-300",
             identityPreviewText: "text-white",
             identityPreviewEditButtonIcon: "text-white/60",
+            headerTitle: "hidden",
+            headerSubtitle: "hidden",
           },
         }}
       />

@@ -21,6 +21,8 @@ export default function SignUpPage() {
             formFieldInput: "bg-[#1A1A1A] border-white/10 text-white",
             formButtonPrimary: "bg-indigo-500 hover:bg-indigo-400",
             footerActionLink: "text-indigo-400 hover:text-indigo-300",
+            headerTitle: "hidden",
+            headerSubtitle: "hidden",
           },
         }}
       />
