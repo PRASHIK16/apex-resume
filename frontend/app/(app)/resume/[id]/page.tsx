@@ -34,7 +34,8 @@ function ScorePill({ score }: { score: number }) {
   );
 }
 
-export default function ResumeDetailPage({ params }: { params: { id: string } }) {
+export default async function ResumeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { getToken } = useAuth();
   const [resume, setResume] = useState<Resume | null>(null);
   const [analyses, setAnalyses] = useState<PastAnalysis[]>([]);
