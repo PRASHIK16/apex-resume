@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowLeft, FileText, Zap, Calendar, HardDrive, CheckCircle2, XCircle, Clock, TrendingUp } from "lucide-react";
@@ -34,8 +34,8 @@ function ScorePill({ score }: { score: number }) {
   );
 }
 
-export default async function ResumeDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default function ResumeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { getToken } = useAuth();
   const [resume, setResume] = useState<Resume | null>(null);
   const [analyses, setAnalyses] = useState<PastAnalysis[]>([]);
@@ -47,8 +47,8 @@ export default async function ResumeDetailPage({ params }: { params: Promise<{ i
       try {
         const token = await getToken();
         const [rRes, aRes] = await Promise.all([
-          fetch(`${apiUrl}/api/v1/resumes/${params.id}`, { headers: { Authorization: `Bearer ${token}` } }),
-          fetch(`${apiUrl}/api/v1/analyses/by-resume/${params.id}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${apiUrl}/api/v1/resumes/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${apiUrl}/api/v1/analyses/by-resume/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
         ]);
         if (rRes.ok) setResume(await rRes.json());
         if (aRes.ok) {
@@ -58,7 +58,7 @@ export default async function ResumeDetailPage({ params }: { params: Promise<{ i
       } catch {}
       finally { setLoading(false); }
     })();
-  }, [params.id]);
+  }, [id]);
 
   const formatBytes = (b?: number) => {
     if (!b) return "—";
@@ -88,7 +88,7 @@ export default async function ResumeDetailPage({ params }: { params: Promise<{ i
             </h1>
             <p className="text-white/40 text-sm">View details and analysis history</p>
           </div>
-          <Link href={`/resume/${params.id}/analyze`}
+          <Link href={`/resume/${id}/analyze`}
             className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2.5 rounded-lg font-medium text-sm transition-colors">
             <Zap className="w-4 h-4" /> Run Analysis
           </Link>
@@ -149,7 +149,7 @@ export default async function ResumeDetailPage({ params }: { params: Promise<{ i
             <Zap className="w-8 h-8 text-white/20 mx-auto mb-3" />
             <p className="text-sm text-white/40 mb-1">No analyses yet</p>
             <p className="text-xs text-white/25 mb-4">Run your first analysis to get an ATS score</p>
-            <Link href={`/resume/${params.id}/analyze`}
+            <Link href={`/resume/${id}/analyze`}
               className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors">
               <Zap className="w-4 h-4" /> Analyze Now →
             </Link>
@@ -165,7 +165,7 @@ export default async function ResumeDetailPage({ params }: { params: Promise<{ i
                   )} />
                   <div>
                     <p className="text-xs text-white/60">
-                      {new Date(a.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      {new Date(a.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                     </p>
                     <p className="text-[10px] text-white/30 capitalize mt-0.5">{a.status}</p>
                   </div>
@@ -175,7 +175,7 @@ export default async function ResumeDetailPage({ params }: { params: Promise<{ i
                     <ScorePill score={a.overall_score} />
                   )}
                   {a.status === "complete" && (
-                    <Link href={`/resume/${params.id}/analyze`}
+                    <Link href={`/resume/${id}/analyze`}
                       className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
                       Re-analyze →
                     </Link>
