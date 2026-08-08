@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   description:
     "Don't just pass the ATS. Make humans remember you. Get AI-powered resume analysis, rejection risk detection, and specific fixes in minutes.",
   keywords: ["resume optimizer", "ATS checker", "AI resume", "job search"],
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
