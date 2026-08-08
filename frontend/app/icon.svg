@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Indigo rounded background -->
+  <rect width="32" height="32" rx="7" fill="#6366F1"/>
+  <!-- Zap / Lightning bolt matching Lucide Zap icon -->
+  <path
+    d="M18.5 4L9 17.5h6.5L13 28L23 14.5h-6.5L18.5 4z"
+    fill="white"
+    stroke="white"
+    stroke-width="0.5"
+    stroke-linejoin="round"
+  />
+</svg>
